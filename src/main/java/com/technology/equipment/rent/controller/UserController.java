@@ -45,6 +45,15 @@ public class UserController {
 	public ResponseEntity<?> getUser(@PathVariable Long id) {
 		return userService.getUser(id);
 	}
+	
+	@ApiOperation(value = "getUserByUsername", notes = "Endpoint that allows obtaining an user by username registered to the system.")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = MessageUtils.USER_FOUND),
+			@ApiResponse(code = 404, message = MessageUtils.USER_NOT_FOUND)})
+	@GetMapping(path = "/users/{username}")
+	public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+		return userService.getUserByUsername(username);
+	}
 
 	@ApiOperation(value = "saveUser", notes = "Endpoint that allows record an user to the system.")
 	@ApiResponses(value = {

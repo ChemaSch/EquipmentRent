@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.technology.equipment.rent.entity.Booking;
-import com.technology.equipment.rent.exception.BookingException;
 import com.technology.equipment.rent.repository.BookingRepository;
 import com.technology.equipment.rent.service.BookingService;
 import com.technology.equipment.rent.utils.DateUtils;
@@ -66,36 +65,36 @@ public class BookingServiceImpl implements BookingService {
 
 		if (bookingsDB == null || bookingsDB.isEmpty()) {
 			return new ResponseEntity<>(bookingRepository.save(booking), HttpStatus.CREATED);
-		} else {
-			// Eliminamos las reservas de equipos que no se corresponden con la solicitud realizada.
-			getFilteredBookingByEquipment(booking, bookingsDB);
-
-			// Exponer la información de las reservas en conflicto, los días y la
-			// proposición de nueva fecha alternativa propuesta.
-			return new ResponseEntity<>(
-					new BookingException(MessageUtils.BOOKING_TEXT, bookingsDB, MessageUtils.DAYS_TEXT,
-							DateUtils.getDatesByRange(getMaximumDateBookingOfEquipment(bookingsDB).getStartDate(),
-									getMaximumDateBookingOfEquipment(bookingsDB).getEndDate()),
-							MessageUtils.ALTERNATIVE_START_DATE_TEXT,
-							DateUtils.getAlternativeStartDate(getMaximumDateBookingOfEquipment(bookingsDB).getEndDate())),
-					HttpStatus.FORBIDDEN);
 		}
+
+		// Delete equipment bookings list that do not correspond to the request made.
+		filteredBookingByEquipment(booking, bookingsDB);
+
+		// Check availability of the dates to make the reservation.
+		if (checkAvailability(booking, bookingsDB)) {
+			return new ResponseEntity<>(bookingRepository.save(booking), HttpStatus.CREATED);
+		} else {
+			// TO DO: Expose information of the bookings in conflict, the days and the
+			// proposal of a new alternative date. Return BookingException.
+			return new ResponseEntity<>(MessageUtils.BOOKING_NOT_CREATED, HttpStatus.FORBIDDEN);
+		}
+
 	}
 
 	@Override
 	@Transactional
 	public ResponseEntity<?> deleteBookingByCode(String codigo) {
-		Booking reservaDB = bookingRepository.findByCode(codigo);
+		Booking bookingDB = bookingRepository.findByCode(codigo);
 
-		if (reservaDB == null) {
+		if (bookingDB == null) {
 			return new ResponseEntity<>(MessageUtils.BOOKING_NOT_FOUND, HttpStatus.NOT_FOUND);
 		} else {
-			bookingRepository.delete(reservaDB);
+			bookingRepository.delete(bookingDB);
 			return new ResponseEntity<>(MessageUtils.BOOKING_DELETED, HttpStatus.OK);
 		}
 	}
 
-	private void getFilteredBookingByEquipment(Booking booking, List<Booking> bookingsDB) {
+	private void filteredBookingByEquipment(Booking booking, List<Booking> bookingsDB) {
 		for (Booking bookingDB : bookingsDB) {
 			if (!bookingDB.getEquipment().getCode().equals(booking.getEquipment().getCode())) {
 				bookingsDB.remove(bookingDB);
@@ -103,14 +102,15 @@ public class BookingServiceImpl implements BookingService {
 		}
 	}
 
-	private Booking getMaximumDateBookingOfEquipment(List<Booking> bookingsDB) {
-		Booking booking = bookingsDB.get(0);
+	private boolean checkAvailability(Booking booking, List<Booking> bookingsDB) {
+		boolean availability = true;
 		for (Booking bookingDB : bookingsDB) {
-			if (bookingDB.getEndDate().isAfter(booking.getEndDate())) {
-				booking = bookingDB;
+			if (DateUtils.isDateBetweenOrEqual(booking.getStartDate(), booking.getEndDate(), bookingDB.getStartDate(),
+					bookingDB.getEndDate())) {
+				availability = false;
 			}
 		}
-		return booking;
+		return availability;
 	}
 
 }

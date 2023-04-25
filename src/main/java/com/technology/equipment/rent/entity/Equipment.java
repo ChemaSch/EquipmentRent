@@ -1,13 +1,17 @@
 package com.technology.equipment.rent.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -26,6 +30,9 @@ public class Equipment implements Serializable {
 	
 	@Column(name = "DESCRIPTION", nullable = false)
 	private String description;
+	
+	@OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL)
+	private List<Booking> bookings;
 
 	public Equipment() {}
 
@@ -33,6 +40,7 @@ public class Equipment implements Serializable {
 		this.id = id;
 		this.code = code;
 		this.description = description;
+		this.bookings = new ArrayList<>();
 	}
 
 	public Long getId() {
@@ -59,9 +67,21 @@ public class Equipment implements Serializable {
 		this.description = description;
 	}
 
+	public List<Booking> getBookings() {
+		return bookings;
+	}
+
+	public void setBookings(List<Booking> bookings) {
+		this.bookings = bookings;
+	}
+	
+	public void addBooking(Booking booking) {
+		bookings.add(booking);
+	}
+
 	@Override
 	public int hashCode() {
-		return Objects.hash(code, description, id);
+		return Objects.hash(bookings, code, description, id);
 	}
 
 	@Override
@@ -73,13 +93,14 @@ public class Equipment implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Equipment other = (Equipment) obj;
-		return Objects.equals(code, other.code) && Objects.equals(description, other.description)
-				&& Objects.equals(id, other.id);
+		return Objects.equals(bookings, other.bookings) && Objects.equals(code, other.code)
+				&& Objects.equals(description, other.description) && Objects.equals(id, other.id);
 	}
 
 	@Override
 	public String toString() {
-		return "Equipment [id=" + id + ", code=" + code + ", description=" + description + "]";
+		return "Equipment [id=" + id + ", code=" + code + ", description=" + description + ", bookings=" + bookings
+				+ "]";
 	}
 
 }

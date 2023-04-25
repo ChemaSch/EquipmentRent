@@ -19,7 +19,8 @@
 	<description>Proyecto de alquiler de equipos para usuarios</description>
 	<properties>
 		<java.version>11</java.version>
-		<springfox.swagger>3.0.0</springfox.swagger>
+		<springfox.swagger.version>3.0.0</springfox.swagger.version>
+		<mapstruct.version>1.5.3.Final</mapstruct.version>
 	</properties>
 
 	<dependencies>
@@ -72,13 +73,19 @@
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
-			<version>${springfox.swagger}</version>
+			<version>${springfox.swagger.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox.swagger}</version>
+			<version>${springfox.swagger.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${mapstruct.version}</version>
 		</dependency>
 	</dependencies>
 

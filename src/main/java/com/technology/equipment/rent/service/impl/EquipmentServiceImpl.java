@@ -1,6 +1,7 @@
 package com.technology.equipment.rent.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,11 +35,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	@Transactional(readOnly = true)
 	public ResponseEntity<?> getEquipment(Long id) {
-		return equipmentRepository.findById(id).map((equipmentDB) -> {
-			return new ResponseEntity<>(equipmentDB, HttpStatus.OK);
-		}).orElseGet(() -> {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		});
+		Optional<Equipment> equipmentDB = equipmentRepository.findById(id);
+		if(equipmentDB.isPresent()) {
+			return new ResponseEntity<>(equipmentDB.get(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(MessageUtils.EQUIPMENT_NOT_FOUND ,HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@Override
@@ -61,12 +63,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	@Transactional
 	public ResponseEntity<?> deleteEquipment(Long id) {
-		return equipmentRepository.findById(id).map((equipmentDB) -> {
-			equipmentRepository.delete(equipmentDB);
-			return new ResponseEntity<>(MessageUtils.EQUIPMENT_DELETED, HttpStatus.OK);
-		}).orElseGet(() -> {
+		if (!equipmentRepository.existsById(id)) {
 			return new ResponseEntity<>(MessageUtils.EQUIPMENT_NOT_FOUND, HttpStatus.NOT_FOUND);
-		});
+		} else {
+			equipmentRepository.deleteById(id);
+			return new ResponseEntity<>(MessageUtils.EQUIPMENT_FOUND, HttpStatus.OK);
+		}
 	}
 
 	private void updateEquipmentProperties(Equipment equipment, Equipment equipmentDB) {

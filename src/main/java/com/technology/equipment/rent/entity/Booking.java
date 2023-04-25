@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -28,7 +29,7 @@ public class Booking implements Serializable {
 	private Long id;
 	
 	@Column(name = "CODE", unique = true, nullable = false, length = 12)
-	private int code;
+	private String code;
 	
 	@Column(name = "START_DATE", nullable = false)
 	@JsonFormat(pattern = "dd/MM/yyyy")
@@ -39,10 +40,12 @@ public class Booking implements Serializable {
 	private LocalDate endDate;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
 	@JsonBackReference
 	private User user;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "equipment_id")
 	@JsonBackReference
 	private Equipment equipment;
 	
@@ -52,7 +55,7 @@ public class Booking implements Serializable {
 		this.id = id;
 	}
 
-	public Booking(Long id, int code, LocalDate startDate, LocalDate endDate, User user, Equipment equipment) {
+	public Booking(Long id, String code, LocalDate startDate, LocalDate endDate, User user, Equipment equipment) {
 		this.id = id;
 		this.code = code;
 		this.startDate = startDate;
@@ -69,11 +72,11 @@ public class Booking implements Serializable {
 		this.id = id;
 	}
 
-	public int getCode() {
+	public String getCode() {
 		return code;
 	}
 
-	public void setCode(int code) {
+	public void setCode(String code) {
 		this.code = code;
 	}
 
